@@ -3,16 +3,7 @@ require 'byebug'
 require_relative '00_tree_node'
 
 class KnightPathFinder
-MOVES = [
-    [-2, -1],
-    [-2,  1],
-    [-1, -2],
-    [-1,  2],
-    [ 1, -2],
-    [ 1,  2],
-    [ 2, -1],
-    [ 2,  1]
-  ]
+
     def self.valid_moves(pos)
         valid_moves = Array.new
         [-1, 1].each do |i|
@@ -23,7 +14,7 @@ MOVES = [
         valid_moves.select do |sub| 
             (sub[0] < 8 && sub[0] > -1) && (sub[1] < 8 && sub[1] > -1)
         end
-       valid_moves
+       #valid_moves
     end
 
     attr_reader :considered_positions
@@ -40,49 +31,45 @@ MOVES = [
         valid_moves.each do |move|
             # debugger
             if !@considered_positions.include?(move)
-                #@considered_positions << move
                 final_valid_moves << move
-            # else
-            #     valid_moves.delete(move)
             end
         end
 
-        # valid_moves
         final_valid_moves
     end
 
     def build_move_tree
         queue = Array.new
         queue << @root_node
-        # p queue
-        # p @root_node
-        # p 'before ___________'
+
         until queue.empty?
-            # debugger
-            # p queue
-            # p 'start of until _______'
             node = queue.shift
-            # @considered_positions << node.value if !@considered_positions.include?(node.value)
-            # @considered_positions = @considered_positions.uniq!
             new_moves = new_move_positions(node.value)
             @considered_positions += new_moves
             @considered_positions.uniq!
             new_moves.each do |move|
                 kiddo = PolyTreeNode.new(move)
                 node.add_child(kiddo)
-                # queue << kiddo
             end
           
 
             queue += node.children
         end
-        p @considered_positions.length
+        #p @considered_positions.length
     end
 
-    # def find_path
-
-    # end
-
+    def find_path(end_pos)
+        self.build_move_tree
+        end_node = @root_node.dfs(end_pos)
+        nodes_arr = trace_path_back(end_node)
+        nodes_arr.map {|node| node.value}
+    end 
+    
+    def trace_path_back(node)
+        return [] if node == nil 
+        nodes_arr = trace_path_back(node.parent)
+        nodes_arr <<  node
+    end 
 
 
 end

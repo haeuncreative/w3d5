@@ -1,89 +1,87 @@
+require 'byebug'
+
 require_relative '00_tree_node'
 
 class KnightPathFinder
-
-    # def self.valid_moves(pos)
-    #     #full range 
-    #     #move 
-    #     (0...pos_row)
-    #         #move up one 
-    #         ()
-    #     (pos_row+1..pos_row+2)
-    # end
- 
-    def self.where_on_board?(pos)
-        # x = pos[0]
-        # y = pos[1]
-        x, y = pos[0], pos[1]
-
-        case [x, y]
-            when [x, y] == [0, 0]
-                return 'corner'
-            when [x, y] == [7, 0]
-                return 'corner'
-            when [x, y] == [0, 7]
-                return 'corner'
-            when [x, y] == [0, 7]
-                return 'corner'
-            when [x - 1, y + 1] == [0, 7]
-                return 'one_space_corner'
-            when [x - 1, y - 1] == [0, 0]
-                return 'one_space_corner'
-            when [x + 1, y + 1] == [7, 7]
-                return 'one_space_corner'
-            when [x + 1, y - 1] == [7, 0]
-                return 'one_space_corner'
-            # when x - 1 == 0 || x + 1 == 7
-            #     if y > 2 && y < 6
-            #         return 'one_space_only'
-            #     end
-            # when y - 1 == 0 || y + 1 == 7
-            #     if x > 2 && x < 6
-            #         return 'one_space_only'
-            #     end
-            # else
-            #     return 'full range'
+MOVES = [
+    [-2, -1],
+    [-2,  1],
+    [-1, -2],
+    [-1,  2],
+    [ 1, -2],
+    [ 1,  2],
+    [ 2, -1],
+    [ 2,  1]
+  ]
+    def self.valid_moves(pos)
+        valid_moves = Array.new
+        [-1, 1].each do |i|
+            [-2, 2].each do |j|
+                valid_moves.push([(pos[0] + i), (pos[1] + j)], [(pos[0] + j), (pos[1] + i)])
             end
-    end
-
-    def self.valid_length(pos, pos2)
-        row1 = pos[0]
-        col1 = pos[1]
-        row2 = pos2[0]
-        col2 = pos2[1]
-
-        row_diff = (row1 - row2).abs
-        col_diff = (col1 - col2).abs
-                
-
-        if row_diff == 1 && col_diff == 2
-            return true
-        elsif row_diff == 2 && col_diff == 1
-            return true
         end
-        return false
+        valid_moves.select do |sub| 
+            (sub[0] < 8 && sub[0] > -1) && (sub[1] < 8 && sub[1] > -1)
+        end
+       valid_moves
     end
 
-    
-
+    attr_reader :considered_positions
 
     def initialize(pos)
         @start_pos = pos
         @root_node = PolyTreeNode.new(pos)
-        @considered_positions = Array.new
+        @considered_positions = Array.new()
     end
 
     def new_move_positions(pos)
+        valid_moves = KnightPathFinder.valid_moves(pos)
+        final_valid_moves = Array.new
+        valid_moves.each do |move|
+            # debugger
+            if !@considered_positions.include?(move)
+                #@considered_positions << move
+                final_valid_moves << move
+            # else
+            #     valid_moves.delete(move)
+            end
+        end
 
+        # valid_moves
+        final_valid_moves
     end
 
     def build_move_tree
+        queue = Array.new
+        queue << @root_node
+        # p queue
+        # p @root_node
+        # p 'before ___________'
+        until queue.empty?
+            # debugger
+            # p queue
+            # p 'start of until _______'
+            node = queue.shift
+            # @considered_positions << node.value if !@considered_positions.include?(node.value)
+            # @considered_positions = @considered_positions.uniq!
+            new_moves = new_move_positions(node.value)
+            @considered_positions += new_moves
+            @considered_positions.uniq!
+            new_moves.each do |move|
+                kiddo = PolyTreeNode.new(move)
+                node.add_child(kiddo)
+                # queue << kiddo
+            end
+          
 
+            queue += node.children
+        end
+        p @considered_positions.length
     end
 
-    def find_path
+    # def find_path
 
-    end
+    # end
 
 
 
